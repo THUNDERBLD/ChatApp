@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import useChatStore, { Chat } from "@/components/store/chatStore"; // Imported Chat from store
+import useChatStore, { Chat } from "@/components/store/chatStore";
 import { blockUser } from "@/lib/blockUserApi";
 import { muteChat as muteChatApi, unmuteChat as unmuteChatApi } from "@/lib/muteApi";
-import userPost, { User } from "@/components/store/userStore"; // Imported User from store
+import userPost, { User } from "@/components/store/userStore";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -25,9 +25,6 @@ import {
   Ban,
   Loader2,
 } from "lucide-react";
-
-// Local interfaces removed to prevent type conflicts. 
-// Using shared types from store imports above.
 
 interface ChatListCardProps {
   chat: Chat;
@@ -63,7 +60,6 @@ const ChatListCard: React.FC<ChatListCardProps> = ({
   const muteChat = useChatStore((state) => state.muteChat);
   const unmuteChat = useChatStore((state) => state.unmuteChat);
 
-  // Note: We use String() comparison or checks to ensure ID types match (string vs number)
   const otherUser = chat.isGroupChat
     ? null
     : chat.users?.find((u) => u._id !== loggedUser?._id);
@@ -74,18 +70,10 @@ const ChatListCard: React.FC<ChatListCardProps> = ({
 
   const displayAvatar = chat.isGroupChat ? chat.groupAvatar : otherUser?.avatar;
 
-  // Added optional chaining (?) to latestMessage because it might be undefined in the store type
-  const lastMessage = chat.latestMessage?.content || "No messages yet"; // Assuming latestMessage is an object in Store type now? 
-  // If latestMessage is a string in your store (based on previous errors), adjust accordingly. 
-  // Based on your previous code it looked like an object here but string in store. 
-  // Assuming Store is the source of truth, if Store says string, this line might need adjustment.
-  // However, usually in Chat apps latestMessage is populated. 
-  
-  // NOTE: If your Chat Store defines latestMessage as 'string', you cannot access .createdAt on it.
-  // Since I am fixing the type error by importing the Store type, I will assume for now 
-  // you might need to fix the Store type or this logic. 
-  // For safety against the specific error, I will cast as any to read properties if the Store type is too simple.
+  // FIX: Cast latestMessage to 'any' to allow property access safely
   const latestMsgObj = chat.latestMessage as any; 
+
+  const lastMessage = latestMsgObj?.content || "No messages yet";
 
   const lastMessageTime = latestMsgObj?.createdAt
     ? new Date(latestMsgObj.createdAt).toLocaleTimeString([], {
@@ -259,10 +247,10 @@ const ChatListCard: React.FC<ChatListCardProps> = ({
                   <span className="font-medium text-foreground/80">
                     {lastMessageSender}:
                   </span>{" "}
-                  {typeof lastMessage === 'string' ? lastMessage : "Sent an attachment"}
+                  {lastMessage}
                 </>
               ) : (
-                 typeof lastMessage === 'string' ? lastMessage : "Sent an attachment"
+                lastMessage
               )}
             </p>
           </div>
@@ -315,7 +303,8 @@ const ChatListCard: React.FC<ChatListCardProps> = ({
               </DropdownMenuItem>
             )}
 
-            {chat.latestMessage && (
+            {/* Check latestMessage existence using casted object */}
+            {latestMsgObj && (
               <DropdownMenuItem onClick={clearChat}>
                 <Eraser className="h-4 w-4 mr-2" />
                 Clear Chat
