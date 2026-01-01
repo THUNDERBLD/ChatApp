@@ -19,6 +19,7 @@ import useChatStore from "@/components/store/chatStore";
 
 interface CreateGroupProps {
   onClose: () => void;
+  showCreateGroup: boolean; // Added missing prop definition
 }
 
 interface SelectedUser {
@@ -28,7 +29,10 @@ interface SelectedUser {
   avatar?: string;
 }
 
-const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) => {
+const CreateGroup: React.FC<CreateGroupProps> = ({
+  onClose,
+  showCreateGroup,
+}) => {
   const [groupName, setGroupName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
@@ -37,7 +41,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
   const [searchLoading, setSearchLoading] = useState(false);
   const [groupAvatar, setGroupAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  // Removed unused uploadingAvatar state
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,7 +83,6 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
     }
   };
 
-
   // Search users
   const searchUsers = async (query: string) => {
     if (!query.trim()) {
@@ -96,7 +99,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
       };
 
       const response = await axios.get(
-        `http://localhost:8000/api/v1/users/search?search=${encodeURIComponent(
+        `${import.meta.env.VITE_URL}/users/search?search=${encodeURIComponent(
           query
         )}`,
         config
@@ -121,11 +124,14 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
 
   // Add user to selected list
   const addUser = (user: User) => {
-    if (!selectedUsers.find((selected) => selected._id === user._id)) {
+    // FIX: Convert IDs to string for comparison to handle mismatched types
+    if (
+      !selectedUsers.find((selected) => String(selected._id) === String(user._id))
+    ) {
       setSelectedUsers((prev) => [
         ...prev,
         {
-          _id: user._id,
+          _id: String(user._id), // FIX: Explicitly cast to string
           username: user.username,
           email: user.email,
           avatar: user.avatar,
@@ -135,7 +141,6 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
       setSearchResults([]);
     }
   };
-  
 
   // Remove user from selected list
   const removeUser = (userId: string) => {
@@ -144,68 +149,68 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
 
   // Create group chat with avatar support
   const createGroupChat = async () => {
-     if (!groupName.trim()) {
-       toast.error("Please enter a group name");
-       return;
-     }
+    if (!groupName.trim()) {
+      toast.error("Please enter a group name");
+      return;
+    }
 
-     if (selectedUsers.length < 2) {
-       toast.error("Please select at least 2 users for the group");
-       return;
-     }
+    if (selectedUsers.length < 2) {
+      toast.error("Please select at least 2 users for the group");
+      return;
+    }
 
-     try {
-       setLoading(true);
+    try {
+      setLoading(true);
 
-       const formData = new FormData();
-       formData.append("name", groupName);
-       formData.append(
-         "users",
-         JSON.stringify(selectedUsers.map((user) => user._id))
-       );
+      const formData = new FormData();
+      formData.append("name", groupName);
+      formData.append(
+        "users",
+        JSON.stringify(selectedUsers.map((user) => user._id))
+      );
 
-       // Append avatar file if selected
-       if (groupAvatar) {
-         formData.append("groupAvatar", groupAvatar);
-       }
+      // Append avatar file if selected
+      if (groupAvatar) {
+        formData.append("groupAvatar", groupAvatar);
+      }
 
-       const config = {
-         headers: {
-           Authorization: `Bearer ${currentUser?.token}`,
-           "Content-Type": "multipart/form-data",
-         },
-       };
+      const config = {
+        headers: {
+          Authorization: `Bearer ${currentUser?.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
 
-       const response = await axios.post(
-         "http://localhost:8000/api/v1/chats/group",
-         formData,
-         config
-       );
+      const response = await axios.post(
+        `${import.meta.env.VITE_URL}/chats/group`,
+        formData,
+        config
+      );
 
-       // Add new chat to store
-       if (response.data.data) {
-         setChats([response.data.data, ...chats]);
-         setCurrentChat(response.data.data);
-         console.log(response.data.data);
-         toast.success("Group created successfully!");
-         onClose();
-       } else {
-         throw new Error("No data returned from server");
-       }
-     } catch (error: any) {
-       console.error("Error creating group:", error);
+      // Add new chat to store
+      if (response.data.data) {
+        setChats([response.data.data, ...chats]);
+        setCurrentChat(response.data.data);
+        console.log(response.data.data);
+        toast.success("Group created successfully!");
+        onClose();
+      } else {
+        throw new Error("No data returned from server");
+      }
+    } catch (error: any) {
+      console.error("Error creating group:", error);
 
-       // Enhanced error handling
-       if (error.response?.data?.message) {
-         toast.error(error.response.data.message);
-       } else if (error.response?.data?.error) {
-         toast.error(error.response.data.error);
-       } else {
-         toast.error("Failed to create group. Please try again.");
-       }
-     } finally {
-       setLoading(false);
-     }
+      // Enhanced error handling
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Failed to create group. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle Enter key press in search
@@ -260,7 +265,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
           {/* Group Avatar Upload */}
           <div>
             <label className="text-sm font-medium mb-2 block">
-              Group Avatar 
+              Group Avatar
             </label>
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -299,10 +304,12 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
                 <Button
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingAvatar}
+                  // Changed disabled check to rely on general loading state
+                  disabled={loading}
                   className="w-full"
                 >
-                  {uploadingAvatar ? (
+                  {/* Changed condition to check main loading state */}
+                  {loading ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
                       Uploading...
@@ -460,7 +467,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
             variant="outline"
             onClick={onClose}
             className="flex-1"
-            disabled={loading || uploadingAvatar}
+            disabled={loading}
           >
             Cancel
           </Button>
@@ -468,17 +475,16 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onClose, showCreateGroup }) =
             onClick={createGroupChat}
             disabled={
               loading ||
-              uploadingAvatar ||
               !groupName.trim() ||
               selectedUsers.length < 2 ||
               groupName.length > 50
             }
             className="flex-1"
           >
-            {loading || uploadingAvatar ? (
+            {loading ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                {uploadingAvatar ? "Uploading..." : "Creating..."}
+                Creating...
               </div>
             ) : (
               <>

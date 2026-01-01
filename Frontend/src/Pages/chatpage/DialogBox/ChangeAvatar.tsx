@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DialogClose,
@@ -7,44 +7,45 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
- 
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axios from 'axios';
-import Loader from '@/components/ui/Loader';
-import { toast } from 'sonner';
-import userPost from '@/components/store/userStore';
-const ChangeAvatar = ({ onClose }) => {
+import axios from "axios";
+import { Loader } from "lucide-react"; // Changed to lucide-react to fix className error
+import { toast } from "sonner";
+import userPost from "@/components/store/userStore";
 
+interface ChangeAvatarProps {
+  onClose: () => void;
+}
+
+const ChangeAvatar: React.FC<ChangeAvatarProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState();
-  const updateAvatar = userPost((state) => state.updateAvatar)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const updateAvatar = userPost((state) => state.updateAvatar);
 
-  
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
   };
 
-
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    // const file = e.target.files[0];
-    // if (!file) return;
 
-      if (!selectedFile) {
+    if (!selectedFile) {
       toast.error("Please select a file first!");
       return;
     }
 
     const formData = new FormData();
-    formData.append("avatar",selectedFile);
+    formData.append("avatar", selectedFile);
 
     setLoading(true);
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/v1/users/update-avatar`,
+        `${import.meta.env.VITE_URL}/users/update-avatar`,
         formData,
         {
           headers: {
@@ -54,22 +55,19 @@ const ChangeAvatar = ({ onClose }) => {
         }
       );
 
-      toast.success("Avatar updated successfully!")
-      // console.log(response);
+      toast.success("Avatar updated successfully!");
       updateAvatar(response.data.data.avatar);
 
-       if (onClose) {
-         onClose();
-       }
-        
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       toast.error("Unable to update avatar");
       console.log("avatar error : ", error);
-      // setLoading(false);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <DialogContent className="sm:max-w-[425px]">
@@ -82,8 +80,14 @@ const ChangeAvatar = ({ onClose }) => {
         </DialogHeader>
         <div className="grid gap-4">
           <div className="grid gap-3">
-            <Label htmlFor="name-1">Avatar</Label>
-            <Input onChange={handleFileSelect} id="avatar" type="file" name="avatar" accept="image/*" />
+            <Label htmlFor="avatar">Avatar</Label>
+            <Input
+              onChange={handleFileSelect}
+              id="avatar"
+              type="file"
+              name="avatar"
+              accept="image/*"
+            />
           </div>
         </div>
         <DialogFooter>
@@ -103,6 +107,6 @@ const ChangeAvatar = ({ onClose }) => {
       </form>
     </DialogContent>
   );
-}
+};
 
-  export default ChangeAvatar;
+export default ChangeAvatar;

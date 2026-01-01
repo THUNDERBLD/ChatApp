@@ -31,7 +31,7 @@ const MessageList: React.FC<MessageListProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [showReactions, setShowReactions] = useState<string | null>(null);
-  const [pickerPosition, setPickerPosition] = useState<'top' | 'bottom'>('top');
+  const [pickerPosition, setPickerPosition] = useState<"top" | "bottom">("top");
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -41,8 +41,14 @@ const MessageList: React.FC<MessageListProps> = ({
   // Close reactions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showReactions && emojiButtonRef.current && !emojiButtonRef.current.contains(event.target as Node)) {
-        const picker = document.getElementById(`emoji-picker-${showReactions}`);
+      if (
+        showReactions &&
+        emojiButtonRef.current &&
+        !emojiButtonRef.current.contains(event.target as Node)
+      ) {
+        const picker = document.getElementById(
+          `emoji-picker-${showReactions}`
+        );
         if (picker && !picker.contains(event.target as Node)) {
           setShowReactions(null);
         }
@@ -64,11 +70,11 @@ const MessageList: React.FC<MessageListProps> = ({
       const spaceAbove = rect.top;
       const spaceBelow = window.innerHeight - rect.bottom;
       const pickerHeight = 80;
-      
+
       if (spaceAbove < pickerHeight && spaceBelow > spaceAbove) {
-        setPickerPosition('bottom');
+        setPickerPosition("bottom");
       } else {
-        setPickerPosition('top');
+        setPickerPosition("top");
       }
     }
   }, [showReactions]);
@@ -105,7 +111,8 @@ const MessageList: React.FC<MessageListProps> = ({
   };
 
   const canEditMessage = (message: Message) => {
-    if (message.sender._id !== currentUser?._id) return false;
+    // FIX: Converted both IDs to String to safely compare string vs number
+    if (String(message.sender._id) !== String(currentUser?._id)) return false;
     const fiveMinutes = 5 * 60 * 1000;
     const timeSinceSent = Date.now() - new Date(message.createdAt).getTime();
     return timeSinceSent <= fiveMinutes;
@@ -139,7 +146,9 @@ const MessageList: React.FC<MessageListProps> = ({
           ) : (
             <>
               {messages.map((msg) => {
-                const isMe = msg.sender?._id === currentUser?._id;
+                // FIX: Converted both IDs to String for comparison
+                const isMe =
+                  String(msg.sender?._id) === String(currentUser?._id);
                 const canEdit = canEditMessage(msg);
                 const isHovered = hoveredMessageId === msg._id;
                 const showEmojiPicker = showReactions === msg._id;
@@ -147,7 +156,9 @@ const MessageList: React.FC<MessageListProps> = ({
                 return (
                   <div
                     key={msg._id}
-                    className={`flex ${isMe ? "justify-end" : "justify-start"} group`}
+                    className={`flex ${
+                      isMe ? "justify-end" : "justify-start"
+                    } group`}
                     onMouseEnter={() => setHoveredMessageId(msg._id)}
                     onMouseLeave={() => setHoveredMessageId(null)}
                   >
@@ -265,8 +276,15 @@ const MessageList: React.FC<MessageListProps> = ({
                         {msg.reactions && msg.reactions.length > 0 && (
                           <MessageReactions
                             reactions={msg.reactions}
-                            currentUserId={currentUser?._id}
-                            onReactionClick={(emoji) => handleReact(msg._id, emoji)}
+                            // FIX: Convert number ID to string if it exists
+                            currentUserId={
+                              currentUser?._id
+                                ? String(currentUser._id)
+                                : undefined
+                            }
+                            onReactionClick={(emoji) =>
+                              handleReact(msg._id, emoji)
+                            }
                           />
                         )}
 
@@ -282,14 +300,16 @@ const MessageList: React.FC<MessageListProps> = ({
                             <span className="italic">edited</span>
                           )}
                           <span>{formatTime(msg.createdAt)}</span>
-                          
+
                           {/* Emoji Reaction Button - Bigger and Outside */}
                           <div className="relative">
                             <button
                               ref={showEmojiPicker ? emojiButtonRef : null}
                               onClick={(e) => toggleReactions(msg._id, e)}
                               className={`p-1.5 rounded-full bg-background border border-border text-white shadow-md hover:shadow-lg hover:scale-110 transition-all ${
-                                isHovered || showEmojiPicker ? 'opacity-100' : 'opacity-0'
+                                isHovered || showEmojiPicker
+                                  ? "opacity-100"
+                                  : "opacity-0"
                               }`}
                               title="Add reaction"
                             >
@@ -298,12 +318,16 @@ const MessageList: React.FC<MessageListProps> = ({
 
                             {/* Emoji Picker Dropdown - Bigger */}
                             {showEmojiPicker && (
-                              <div 
+                              <div
                                 id={`emoji-picker-${msg._id}`}
-                                className={`absolute ${isMe ? 'right-0 translate-x-5 -translate-y-1' : 'left-0 -translate-x-5 -translate-y-1'} bg-background border-2 border-border rounded-xl shadow-2xl p-3 z-[100] animate-in fade-in ${
-                                  pickerPosition === 'top' 
-                                    ? 'bottom-full mb-3 slide-in-from-bottom-2' 
-                                    : 'top-full mt-3 slide-in-from-top-2'
+                                className={`absolute ${
+                                  isMe
+                                    ? "right-0 translate-x-5 -translate-y-1"
+                                    : "left-0 -translate-x-5 -translate-y-1"
+                                } bg-background border-2 border-border rounded-xl shadow-2xl p-3 z-[100] animate-in fade-in ${
+                                  pickerPosition === "top"
+                                    ? "bottom-full mb-3 slide-in-from-bottom-2"
+                                    : "top-full mt-3 slide-in-from-top-2"
                                 }`}
                                 onClick={(e) => e.stopPropagation()}
                               >
@@ -325,11 +349,13 @@ const MessageList: React.FC<MessageListProps> = ({
                                   ))}
                                 </div>
                                 {/* Bigger Arrow pointer */}
-                                <div 
-                                  className={`absolute ${isMe ? 'right-6' : 'left-6'} w-5 h-5 bg-background border-border ${
-                                    pickerPosition === 'top'
-                                      ? '-bottom-2.5 border-b-2 border-r-2 rotate-45'
-                                      : '-top-2.5 border-t-2 border-l-2 rotate-45'
+                                <div
+                                  className={`absolute ${
+                                    isMe ? "right-6" : "left-6"
+                                  } w-5 h-5 bg-background border-border ${
+                                    pickerPosition === "top"
+                                      ? "-bottom-2.5 border-b-2 border-r-2 rotate-45"
+                                      : "-top-2.5 border-t-2 border-l-2 rotate-45"
                                   }`}
                                 />
                               </div>

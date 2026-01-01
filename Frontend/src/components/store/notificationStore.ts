@@ -27,13 +27,14 @@ export interface Notification {
   updatedAt: Date;
 }
 
+// FIX: Added ' | undefined' to allow keys to be cleared or accessed safely
 export interface UnreadCountPerChat {
   [chatId: string]: {
     count: number;
     lastNotification: Date;
     chatName: string;
     isGroupChat: boolean;
-  };
+  } | undefined;
 }
 
 interface NotificationStore {
@@ -91,7 +92,7 @@ const useNotificationStore = create<NotificationStore>((set) => ({
         unreadCount: Math.max(0, state.unreadCount - chatNotifications.length),
         unreadPerChat: {
           ...state.unreadPerChat,
-          [chatId]: undefined,
+          [chatId]: undefined, // Now valid due to interface update
         },
       };
     }),
@@ -117,28 +118,28 @@ const useNotificationStore = create<NotificationStore>((set) => ({
     set({ notifications: [], unreadCount: 0, unreadPerChat: {} }),
 
   // The backend already handles this, but for extra safety on frontend:
-incrementUnreadForChat: (chatId, chatName, isGroupChat) =>
-  set((state) => {
-    // Check if chat is muted (this is optional since backend handles it)
-    const isMuted = useChatStore.getState().isChatMuted(chatId);
-    
-    if (isMuted) {
-      console.log(`Chat ${chatId} is muted, skipping notification increment`);
-      return state; // Don't increment if muted
-    }
-    
-    return {
-      unreadPerChat: {
-        ...state.unreadPerChat,
-        [chatId]: {
-          count: (state.unreadPerChat[chatId]?.count || 0) + 1,
-          lastNotification: new Date(),
-          chatName,
-          isGroupChat,
+  incrementUnreadForChat: (chatId, chatName, isGroupChat) =>
+    set((state) => {
+      // Check if chat is muted (this is optional since backend handles it)
+      const isMuted = useChatStore.getState().isChatMuted(chatId);
+      
+      if (isMuted) {
+        console.log(`Chat ${chatId} is muted, skipping notification increment`);
+        return state; // Don't increment if muted
+      }
+      
+      return {
+        unreadPerChat: {
+          ...state.unreadPerChat,
+          [chatId]: {
+            count: (state.unreadPerChat[chatId]?.count || 0) + 1,
+            lastNotification: new Date(),
+            chatName,
+            isGroupChat,
+          },
         },
-      },
-    };
-  }),
+      };
+    }),
 
   clearUnreadForChat: (chatId) =>
     set((state) => {

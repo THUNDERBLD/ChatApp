@@ -52,7 +52,7 @@ const AddUser = ({ onClose }: { onClose: () => void }) => {
         }
       };
       const response = await axios.get(
-        `http://localhost:8000/api/v1/users/register?search=${query}`,
+        `${import.meta.env.VITE_URL}/users/register?search=${query}`,
         config
       );
       
@@ -75,7 +75,7 @@ const AddUser = ({ onClose }: { onClose: () => void }) => {
         },
       };
       const response = await axios.post(
-        "http://localhost:8000/api/v1/chats/",
+        `${import.meta.env.VITE_URL}/chats/`,
         { userId },
         config
       );
