@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { User } from "./userStore";
 
 export interface IncomingCall {
   callerId: string;

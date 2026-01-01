@@ -2,13 +2,20 @@ import {create} from 'zustand'
 import {devtools , persist} from 'zustand/middleware'
 
 export type User = {
-    _id: number;
+    _id: number | string;
     token : string,
     username : string;
     email: string;
     password: string;
     avatar: string;
     blockedUsers?: string[]; // NEW: Array of blocked user IDs
+
+    status?: 'online' | 'offline' | 'busy' | 'away';
+    lastSeen?: Date;
+    bio?: string;
+    createdAt?: Date;
+    profilePicture?: string;
+
 };
 
 type UserState = {

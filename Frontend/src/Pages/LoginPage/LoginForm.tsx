@@ -64,7 +64,7 @@ const LoginForm = ({ onSwitchToSignup, onForgotPassword }: LoginFormProps) => {
     setLoading(true)
     try {
       const { data } = await axios.post(
-        "http://localhost:8000/api/v1/users/login",
+        `${import.meta.env.VITE_URL}/users/login`,
         { email: formData.email, password: formData.password }
       )
 

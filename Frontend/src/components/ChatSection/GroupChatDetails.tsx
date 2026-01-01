@@ -65,8 +65,6 @@ const GroupChatDetails: React.FC<GroupChatDetailsProps> = ({
   onOpenChange,
   group,
   currentUser,
-  formatTime,
-  onEditGroup,
   onLeaveGroup,
   onAddMembers,
   allUsers = [],

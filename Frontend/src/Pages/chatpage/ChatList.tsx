@@ -98,7 +98,7 @@ const ChatList = ({ onChatSelect, selectedChat }) => {
       };
 
       const response = await axios.put(
-        "http://localhost:8000/api/v1/chats/toggle-pin",
+        `${import.meta.env.VITE_URL}/chats/toggle-pin`,
         { chatId },
         config
       );
@@ -142,7 +142,7 @@ const ChatList = ({ onChatSelect, selectedChat }) => {
       };
 
       await axios.put(
-        `http://localhost:8000/api/v1/notifications/read-chat/${chatId}`,
+        `${import.meta.env.VITE_URL}/notifications/read-chat/${chatId}`,
         {},
         config
       );
@@ -164,7 +164,7 @@ const ChatList = ({ onChatSelect, selectedChat }) => {
       setLoading(true);
 
       const response = await axios.delete(
-        `http://localhost:8000/api/v1/chats/delete-chat/${chatId}`,
+        `${import.meta.env.VITE_URL}/chats/delete-chat/${chatId}`,
         config
       );
 
@@ -192,7 +192,7 @@ const ChatList = ({ onChatSelect, selectedChat }) => {
       };
 
       const response = await axios.delete(
-        `http://localhost:8000/api/v1/chats/clear-chat/${chatId}`,
+        `${import.meta.env.VITE_URL}/chats/clear-chat/${chatId}`,
         config
       );
 
@@ -212,7 +212,7 @@ const ChatList = ({ onChatSelect, selectedChat }) => {
       };
 
       const response = await axios.get(
-        "http://localhost:8000/api/v1/notifications/unread-per-chat",
+        `${import.meta.env.VITE_URL}/notifications/unread-per-chat`,
         config
       );
 
@@ -243,7 +243,7 @@ const ChatList = ({ onChatSelect, selectedChat }) => {
       };
 
       const response = await axios.get(
-        "http://localhost:8000/api/v1/chats/fetch-chats",
+        `${import.meta.env.VITE_URL}/chats/fetch-chats`,
         config
       );
       setChats(response.data.data);

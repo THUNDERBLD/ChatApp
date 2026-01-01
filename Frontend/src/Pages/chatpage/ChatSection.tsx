@@ -27,7 +27,7 @@ import EditMessageModal from "@/components/ChatSection/EditMessageModal";
 
 import { useVoiceCall } from "../../hooks/useVoiceCall";
 
-const ENDPOINT = "http://localhost:8000";
+const ENDPOINT = import.meta.env.VITE_SOCKET_URL;
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 let currentChatCompare: Chat | undefined;
 
@@ -111,7 +111,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({ chat, onBack }) => {
       };
 
       const response = await axios.get(
-        "http://localhost:8000/api/v1/notifications/unread-count",
+        `${import.meta.env.VITE_URL}/notifications/unread-count`,
         config
       );
 
@@ -156,7 +156,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({ chat, onBack }) => {
       };
 
       const { data } = await axios.put(
-        `http://localhost:8000/api/v1/messages/edit/${messageId}`,
+        `${import.meta.env.VITE_URL}/messages/edit/${messageId}`,
         { content: newContent },
         config
       );
@@ -208,7 +208,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({ chat, onBack }) => {
       };
 
       const { data } = await axios.post(
-        `http://localhost:8000/api/v1/messages/react/${messageId}`,
+        `${import.meta.env.VITE_URL}/messages/react/${messageId}`,
         { emoji },
         config
       );
@@ -382,7 +382,7 @@ useEffect(() => {
       };
       setLoading(true);
       const { data } = await axios.get(
-        `http://localhost:8000/api/v1/messages/${currentChat._id}`,
+        `${import.meta.env.VITE_URL}/messages/${currentChat._id}`,
         config
       );
 
@@ -444,7 +444,7 @@ useEffect(() => {
       setSelectedFiles([]);
 
       const { data } = await axios.post(
-        "http://localhost:8000/api/v1/messages/sent",
+        `${import.meta.env.VITE_URL}/messages/sent`,
         formData,
         {
           headers: {
@@ -491,7 +491,7 @@ useEffect(() => {
       };
 
       const { data } = await axios.delete(
-        `http://localhost:8000/api/v1/chats/clear-chat/${currentChat._id}`,
+        `${import.meta.env.VITE_URL}/chats/clear-chat/${currentChat._id}`,
         config
       );
 
@@ -571,7 +571,7 @@ useEffect(() => {
       };
 
       await axios.put(
-        `http://localhost:8000/api/v1/chats/group-leave`,
+        `${import.meta.env.VITE_URL}/chats/group-leave`,
         {
           chatId: group._id,
           userId: currentUser._id,

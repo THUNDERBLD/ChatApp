@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Socket } from "socket.io-client";
 import { User } from "@/components/store/userStore";
 import useCallStore from "@/components/store/callStore";
@@ -208,7 +208,7 @@ export const useVoiceCall = (
     // Save call log to backend
     try {
       await axios.post(
-        "http://localhost:8000/api/v1/calls/log",
+        `${import.meta.env.VITE_URL}/calls/log`,
         {
           receiverId: activeCall.userId,
           callType: "voice",
