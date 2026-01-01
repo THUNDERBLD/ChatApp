@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import Header from './Header'
 import ChatList from './ChatList'
 import ChatSection from './ChatSection';
-import useChatStore from '@/components/store/chatStore';
+import useChatStore, { Chat } from '@/components/store/chatStore';
 
 const ChatPage = () => {
-  const [selectedChat, setSelectedChat] = useState(null);
+  // Fix: Explicitly define the state type to accept Chat objects
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024)
 
   const setCurrentChat = useChatStore((state) => state.setCurrentChat)
@@ -20,7 +21,8 @@ const ChatPage = () => {
     return () => window.removeEventListener('resize', handleSize)
   }, [])
   
-  const handleChatSelect = (chat) => {
+  // Fix: Typed the parameter
+  const handleChatSelect = (chat: Chat | null) => {
     setSelectedChat(chat)
     setCurrentChat(chat);
   }
@@ -60,7 +62,8 @@ const ChatPage = () => {
           {selectedChat ? (
             <ChatSection
               chat={selectedChat}
-              onBack={isMobileView ? handleBackToChatList : null}
+              // Fix: Changed null to undefined to match optional prop type
+              onBack={isMobileView ? handleBackToChatList : undefined}
             />
           ) : (
             <div className="flex-1 hidden lg:flex items-center justify-center bg-muted/30">
@@ -78,4 +81,4 @@ const ChatPage = () => {
   );
 }
 
-export default ChatPage
+export default ChatPage;

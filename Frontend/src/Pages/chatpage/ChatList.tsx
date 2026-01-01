@@ -15,18 +15,23 @@ import BlockedUsersList from "../../components/ChatSection/BlockedUsersList";
 import ChatListCard from "../Cards/ChatListCard";
 import AddUser from "../Cards/AddUser";
 import CreateGroup from "../Cards/CreateGroup";
-import useChatStore from "@/components/store/chatStore";
+import useChatStore, { Chat } from "@/components/store/chatStore";
 import useNotificationStore from "@/components/store/notificationStore";
-import userPost, { User } from "@/components/store/userStore";
-import { Chat } from "@/components/store/chatStore";
+import userPost from "@/components/store/userStore"; // User is imported but not used directly in types here
 import { getMutedChats } from "@/lib/muteApi";
 
-const ChatList = ({ onChatSelect, selectedChat }) => {
+// Defined Interface to fix implicit any errors
+interface ChatListProps {
+  onChatSelect: (chat: Chat | null) => void;
+  selectedChat: Chat | null;
+}
+
+const ChatList: React.FC<ChatListProps> = ({ onChatSelect, selectedChat }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showBlockedUsers, setShowBlockedUsers] = useState(false);
-  const [loggedUser, setLoggedUser] = useState<User | null>(null);
+  // Removed loggedUser state as it was declared but never read.
   const [loading, setLoading] = useState(false);
   
   // NEW: State to control which dropdown menu is currently open
@@ -222,9 +227,7 @@ const ChatList = ({ onChatSelect, selectedChat }) => {
     }
   };
 
-  useEffect(() => {
-    setLoggedUser(currentUser);
-  }, [currentUser]);
+  // Removed useEffect for setLoggedUser since loggedUser state was removed
 
   useEffect(() => {
     if (currentUser) {

@@ -310,14 +310,14 @@ export const useVoiceCall = (
       }
     });
 
-    // Call rejected
-    socket.on("call:rejected", ({ receiverId, reason }) => {
+    // Call rejected (removed receiverId)
+    socket.on("call:rejected", ({ reason }) => {
       toast.error(reason || "Call rejected");
       cleanup();
     });
 
-    // Call ended
-    socket.on("call:ended", ({ duration }) => {
+    // Call ended (removed duration)
+    socket.on("call:ended", () => {
       toast.info("Call ended");
       cleanup();
     });
@@ -328,8 +328,8 @@ export const useVoiceCall = (
       cleanup();
     });
 
-    // ICE candidate
-    socket.on("webrtc:ice-candidate", async ({ from, candidate }) => {
+    // ICE candidate (removed from)
+    socket.on("webrtc:ice-candidate", async ({ candidate }) => {
       if (peerConnectionRef.current) {
         try {
           await peerConnectionRef.current.addIceCandidate(

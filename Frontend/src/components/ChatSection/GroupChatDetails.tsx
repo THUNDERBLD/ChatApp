@@ -22,7 +22,7 @@ import {
 import { User } from "@/components/store/userStore";
 import AddMember from "./AddMember";
 import EditGroupDetails from "./EditGroupDetails";
-import DeleteGroupModal from "./DeleteGroupModal"; // NEW IMPORT
+import DeleteGroupModal from "./DeleteGroupModal"; 
 
 interface GroupMember {
   _id: string;
@@ -58,6 +58,7 @@ interface GroupChatDetailsProps {
   onLeaveGroup?: (group: GroupChat) => void;
   allUsers?: User[];
   onGroupUpdate?: (updatedGroup: GroupChat) => void;
+  onGroupChatDelete?: () => void; // Added missing prop to interface
 }
 
 const GroupChatDetails: React.FC<GroupChatDetailsProps> = ({
@@ -69,13 +70,13 @@ const GroupChatDetails: React.FC<GroupChatDetailsProps> = ({
   onAddMembers,
   allUsers = [],
   onGroupUpdate,
-  onGroupChatDelete
+  onGroupChatDelete,
 }) => {
   const [addMembersOpen, setAddMembersOpen] = useState(false);
   const [editGroupOpen, setEditGroupOpen] = useState(false);
-  const [deleteGroupOpen, setDeleteGroupOpen] = useState(false); // NEW STATE
+  const [deleteGroupOpen, setDeleteGroupOpen] = useState(false);
   const [localGroup, setLocalGroup] = useState<GroupChat | null>(group);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRefreshing] = useState(false); // Removed unused setIsRefreshing
 
   // Update local group when prop changes
   useEffect(() => {
@@ -198,7 +199,7 @@ const GroupChatDetails: React.FC<GroupChatDetailsProps> = ({
   // NEW: Handle group deleted
   const handleGroupDeleted = () => {
     onOpenChange(false);
-    onGroupChatDelete();
+    if (onGroupChatDelete) onGroupChatDelete();
     // The parent component should handle navigation
     if (onLeaveGroup) {
       onLeaveGroup(localGroup);
@@ -422,10 +423,10 @@ const GroupChatDetails: React.FC<GroupChatDetailsProps> = ({
         open={addMembersOpen}
         onOpenChange={setAddMembersOpen}
         existingMembers={localGroup.users}
-        allUsers={allUsers}
-        onConfirm={handleAddMembers}
-        currentUser={currentUser}
-        currentChat={localGroup}
+        allUsers={allUsers as any}
+        onConfirm={handleAddMembers as any}
+        currentUser={currentUser as any}
+        currentChat={localGroup as any}
         onMembersAdded={handleMembersAdded}
       />
 
@@ -434,9 +435,9 @@ const GroupChatDetails: React.FC<GroupChatDetailsProps> = ({
         <EditGroupDetails
           open={editGroupOpen}
           onOpenChange={setEditGroupOpen}
-          group={localGroup}
+          group={localGroup as any}
           currentUser={currentUser}
-          onGroupUpdated={handleGroupDetailsUpdated}
+          onGroupUpdated={handleGroupDetailsUpdated as any}
         />
       )}
 
@@ -445,7 +446,7 @@ const GroupChatDetails: React.FC<GroupChatDetailsProps> = ({
         <DeleteGroupModal
           open={deleteGroupOpen}
           onOpenChange={setDeleteGroupOpen}
-          group={localGroup}
+          group={localGroup as any}
           currentUser={currentUser}
           onGroupDeleted={handleGroupDeleted}
         />
